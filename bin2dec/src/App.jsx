@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 export default function App() {
   const [ binaryText, setBinaryText ] = useState("");
   const [ decimalText, setDecimalText ] = useState("");
-  const [isInvalid, setIsInvalid ] = useState(false);
+  const [ isInvalid, setIsInvalid ] = useState(false);
+  const [ lastChanged, setLastChanged ] = useState(null);
 
   function updateBinary(event) {
     const num = event.currentTarget.value;
@@ -16,17 +17,22 @@ export default function App() {
         return;
       };
     };
+    setIsInvalid(false);
     setBinaryText(num);
+    setLastChanged("binary");
   }
+
+  
 
   function updateDecimal(e) {
     setDecimalText(e.currentTarget.value);
+    setLastChanged("decimal");
   }
 
   function binaryToDecimal() {
     let sum = 0;
     binaryText.split('')
-      .map((digit, index) => {
+      .forEach((digit, index) => {
         digit = Number(digit);
         sum += (digit * 2**(binaryText.length-index-1));
     })
@@ -49,11 +55,11 @@ export default function App() {
   }
 
   useEffect(() => {
-    binaryToDecimal();
+    if (lastChanged === "binary") binaryToDecimal();
   }, [binaryText])
 
   useEffect(() => {
-    decimalToBinary();
+    if (lastChanged === "decimal") decimalToBinary();
   }, [decimalText])
 
   return(
@@ -68,6 +74,8 @@ export default function App() {
             <input 
               type="text" 
               value={binaryText}
+              maxLength={8}
+              className={isInvalid ? "invalid" : ""}
               onChange={(event) => updateBinary(event)}></input>
           </div>
           <div className="input-container">
